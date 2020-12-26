@@ -6,3 +6,6 @@ doit:
 
 publish: doit
 	cp panwalks* ~/web/stellated/pix
+
+clean:
+	rm -rf *.png *.gif .DS_Store
