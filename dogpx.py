@@ -2,6 +2,8 @@
 
 import functools
 import glob
+import os
+import sys
 
 import cartopy.crs
 import cartopy.io.img_tiles
@@ -53,6 +55,8 @@ sb = all_points.bounds
 pad = .01
 extent = [sb[0]-pad, sb[2]+pad, sb[1]-pad, sb[3]+pad]
 
+os.makedirs("out", exist_ok=True)
+
 # +2: first image no walks, last image all walks, not red.
 for num in tqdm.tqdm(range(len(walks) + 2)):
     fig, ax = plt.subplots(
@@ -72,9 +76,7 @@ for num in tqdm.tqdm(range(len(walks) + 2)):
             linewidth=1 if latest else .2,
         )
 
-    plot_png(ax, f"out_{num:03d}.png")
+    plot_png(ax, f"out/{num:03d}.png")
     if num == len(walks) + 1:
         plot_png(ax, "panwalks_large.png", dpi=1200)
     plt.close(fig)
-
-# convert -delay 15  out_*.png -strip -coalesce -layers Optimize walks.gif
