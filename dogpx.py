@@ -68,12 +68,15 @@ for num in tqdm.tqdm(range(len(walks) + 2)):
 
     for iwalk, walk in enumerate(walks[:num]):
         latest = (iwalk == num-1)
+        if latest:
+            style_kwargs = dict(edgecolor="red", linewidth=1)
+        else:
+            style_kwargs = dict(edgecolor="black", linewidth=.2)
         ax.add_geometries(
-            [walk], 
+            [walk],
             cartopy.crs.PlateCarree(),
             facecolor="none",
-            edgecolor="red" if latest else "black",
-            linewidth=1 if latest else .2,
+            **style_kwargs,
         )
 
     plot_png(ax, f"out/{num:03d}.png")
