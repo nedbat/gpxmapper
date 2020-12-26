@@ -17,7 +17,7 @@ png $(PNG): $(LAST)
 	cp $$(ls -1 out/*.png | tail -1) $(PNG)
 
 publish: all
-	cp panwalks* ~/web/stellated/pix
+	scp panwalks* drop1:drop1/www
 
 clean:
 	rm -rf *.png *.gif out .DS_Store
