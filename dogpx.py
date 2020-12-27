@@ -14,7 +14,6 @@ import tqdm
 
 DETAIL_LEVEL = 15   # 17 = all street names
 DPI = 300
-GPXS = "/Users/ned/walks/brookline/*.gpx"
 
 
 def plot_png(ax, fname, dpi=DPI):
@@ -39,7 +38,7 @@ tiles = PositronTiles()
 
 boundss = []
 walks = []
-for gpxname in sorted(glob.glob(GPXS)):
+for gpxname in sorted(glob.glob(sys.argv[1])):
     with fiona.open(gpxname, layer="routes") as layer:
         lb = layer.bounds
         walk = shapely.geometry.shape({
