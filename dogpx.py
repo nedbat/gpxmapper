@@ -56,8 +56,13 @@ extent = [sb[0]-pad, sb[2]+pad, sb[1]-pad, sb[3]+pad]
 
 os.makedirs("out", exist_ok=True)
 
-# +2: first image no walks, last image all walks, not red.
-for num in tqdm.tqdm(range(len(walks) + 2)):
+styles = {
+    0: dict(edgecolor="#000000", linewidth=.2),
+    2: dict(edgecolor="#7f0000", linewidth=.5),
+    1: dict(edgecolor="#ff0000", linewidth=1),
+}
+# first image no walks, last image all walks, not red.
+for num in tqdm.tqdm(range(len(walks) + len(styles))):
     fig, ax = plt.subplots(
         subplot_kw=dict(projection=tiles.crs),
     )
@@ -66,11 +71,7 @@ for num in tqdm.tqdm(range(len(walks) + 2)):
     ax.add_image(tiles, DETAIL_LEVEL)
 
     for iwalk, walk in enumerate(walks[:num]):
-        latest = (iwalk == num-1)
-        if latest:
-            style_kwargs = dict(edgecolor="red", linewidth=1)
-        else:
-            style_kwargs = dict(edgecolor="black", linewidth=.2)
+        style_kwargs = styles.get(num - iwalk, styles[0])
         ax.add_geometries(
             [walk],
             cartopy.crs.PlateCarree(),

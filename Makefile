@@ -3,7 +3,8 @@
 GPXS = /Users/ned/walks/brookline/*.gpx
 GIF = panwalks.gif
 PNG = panwalks.png
-LAST = out/150.png panwalks_large.png
+LAST = panwalks_large.png
+FINAL_FRAME = $$(ls -1 out/*.png | tail -1)
 
 all: $(LAST) $(PNG) $(GIF)
 
@@ -11,10 +12,10 @@ walks $(LAST): $(GPXS)
 	python dogpx.py "$(GPXS)"
 
 gif $(GIF): $(LAST)
-	convert -delay 15 -loop 1 out/*.png -strip -coalesce -layers Optimize $(GIF)
+	convert -delay 15 -loop 0 out/*.png -delay 1000 $(FINAL_FRAME) -strip -coalesce -layers Optimize $(GIF)
 
 png $(PNG): $(LAST)
-	cp $$(ls -1 out/*.png | tail -1) $(PNG)
+	cp $(FINAL_FRAME) $(PNG)
 
 publish: all
 	scp panwalks* drop1:drop1/www
