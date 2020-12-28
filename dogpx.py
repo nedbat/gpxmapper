@@ -58,7 +58,7 @@ os.makedirs("out", exist_ok=True)
 
 styles = {
     0: dict(edgecolor="#000000", linewidth=.2),
-    2: dict(edgecolor="#7f0000", linewidth=.5),
+    #2: dict(edgecolor="#7f0000", linewidth=.5),
     1: dict(edgecolor="#ff0000", linewidth=1),
 }
 # first image no walks, last image all walks, not red.
