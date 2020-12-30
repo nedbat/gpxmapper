@@ -82,11 +82,12 @@ def plot_shapes(shapes, styles, fname, detail_level=DETAIL_LEVEL, dpi=DPI):
     ax.add_image(tiles, detail_level)
 
     for shape, style_kwargs in zip_end(shapes, styles):
-        ax.add_geometries(
-            [shape],
-            cartopy.crs.PlateCarree(),
-            **style_kwargs,
-        )
+        if shape is not None:
+            ax.add_geometries(
+                [shape],
+                cartopy.crs.PlateCarree(),
+                **style_kwargs,
+            )
 
     plot_png(ax, fname, dpi=dpi)
     plt.close(fig)
@@ -94,11 +95,14 @@ def plot_shapes(shapes, styles, fname, detail_level=DETAIL_LEVEL, dpi=DPI):
 styles = [
     dict(edgecolor="#000000", linewidth=.2, facecolor="none"),
     #dict(edgecolor="#7f0000", linewidth=.5, facecolor="none"),
+    #dict(edgecolor="#0000ff", linewidth=1, facecolor="none"),
+    #dict(edgecolor="#00ff00", linewidth=1, facecolor="none"),
     dict(edgecolor="#ff0000", linewidth=1, facecolor="none"),
 ]
 
-# first image no walks, last image all walks, not red.
-for num in tqdm.tqdm(range(len(walks) + len(styles))):
+# first image no walks, last image all walks, not colored.
+walks += [None] * (len(styles) - 1)
+for num in tqdm.tqdm(range(len(walks) + 1)):
     plot_shapes(walks[:num], styles, f"out/{num:03d}.png")
 
 # Plot everything larger with more detail.
