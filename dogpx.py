@@ -2,6 +2,7 @@
 
 import functools
 import glob
+import itertools
 import os
 import sys
 
@@ -56,30 +57,43 @@ extent = [sb[0]-pad, sb[2]+pad, sb[1]-pad, sb[3]+pad]
 
 os.makedirs("out", exist_ok=True)
 
-styles = {
-    0: dict(edgecolor="#000000", linewidth=.2),
-    #2: dict(edgecolor="#7f0000", linewidth=.5),
-    1: dict(edgecolor="#ff0000", linewidth=1),
-}
-# first image no walks, last image all walks, not red.
-for num in tqdm.tqdm(range(len(walks) + len(styles))):
+def zip_end(long, short):
+    """Zip long and short together, aligned at the end."""
+    if not long:
+        shorts = []
+    else:
+        shorts = short[-len(long):]
+    together = list(itertools.zip_longest(reversed(long), reversed(shorts), fillvalue=short[0]))
+    return list(reversed(together))
+
+def plot_shapes(shapes, styles, fname, detail_level=DETAIL_LEVEL, dpi=DPI):
     fig, ax = plt.subplots(
         subplot_kw=dict(projection=tiles.crs),
     )
     ax.set_extent(extent)
     ax.apply_aspect()
-    ax.add_image(tiles, DETAIL_LEVEL)
+    ax.add_image(tiles, detail_level)
 
-    for iwalk, walk in enumerate(walks[:num]):
-        style_kwargs = styles.get(num - iwalk, styles[0])
+    for shape, style_kwargs in zip_end(shapes, styles):
         ax.add_geometries(
-            [walk],
+            [shape],
             cartopy.crs.PlateCarree(),
-            facecolor="none",
             **style_kwargs,
         )
 
-    plot_png(ax, f"out/{num:03d}.png")
-    if num == len(walks) + 1:
-        plot_png(ax, "panwalks_large.png", dpi=1200)
+    plot_png(ax, fname, dpi=dpi)
     plt.close(fig)
+
+styles = [
+    dict(edgecolor="#000000", linewidth=.2, facecolor="none"),
+    #dict(edgecolor="#7f0000", linewidth=.5, facecolor="none"),
+    dict(edgecolor="#ff0000", linewidth=1, facecolor="none"),
+]
+
+# first image no walks, last image all walks, not red.
+for num in tqdm.tqdm(range(len(walks) + len(styles))):
+    plot_shapes(walks[:num], styles, f"out/{num:03d}.png")
+
+# Plot everything larger with more detail.
+print("panwalks_large.png")
+plot_shapes(walks, styles[:1], "panwalks_large.png", detail_level=DETAIL_LEVEL+1, dpi=1200)
