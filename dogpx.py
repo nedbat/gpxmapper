@@ -10,6 +10,7 @@ import cartopy.crs
 import cartopy.io.img_tiles
 import fiona
 import matplotlib.pyplot as plt
+import pyproj
 import shapely.geometry
 import tqdm
 
@@ -37,8 +38,11 @@ class PositronTiles(cartopy.io.img_tiles.GoogleWTS):
 
 tiles = PositronTiles()
 
+METERS_PER_MILE = 1609.34
+
 boundss = []
 walks = []
+total = 0
 for gpxname in sorted(glob.glob(sys.argv[1])):
     with fiona.open(gpxname, layer="routes") as layer:
         lb = layer.bounds
@@ -47,9 +51,12 @@ for gpxname in sorted(glob.glob(sys.argv[1])):
             "coordinates": layer[0]["geometry"]["coordinates"],
         })
         walks.append(walk)
+        dist = pyproj.Geod(ellps="WGS84").geometry_length(walk)
+        total += dist
     boundss.append((lb[0], lb[1]))
     boundss.append((lb[2], lb[3]))
 all_points = shapely.geometry.MultiPoint(boundss)
+print(total / METERS_PER_MILE, "miles")
 
 sb = all_points.bounds
 pad = .01
