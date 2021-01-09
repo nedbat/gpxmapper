@@ -14,7 +14,8 @@ walks $(LAST): $(GPXS)
 	python dogpx.py "$(GPXS)"
 
 gif $(GIF): $(LAST)
-	convert -delay 15 -loop 0 out/*.png -delay 1000 $(FINAL_FRAME) -strip -coalesce -layers Optimize $(GIF)
+	convert -delay 15 -loop 0 out/*.png -delay 1000 $(FINAL_FRAME) -strip -coalesce -layers Optimize out/$(GIF)
+	gifsicle -i out/$(GIF) -O3 --colors 16 -o $(GIF)
 
 png $(PNG): $(LAST)
 	cp $(FINAL_FRAME) $(PNG)
