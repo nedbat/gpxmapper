@@ -6,6 +6,8 @@ PNG = panwalks.png
 LAST = panwalks_large.png
 FINAL_FRAME = $$(ls -1 out/*.png | tail -1)
 
+after: walks publish tidy
+
 all: $(LAST) $(PNG) $(GIF)
 
 walks $(LAST): $(GPXS)
@@ -20,8 +22,11 @@ png $(PNG): $(LAST)
 publish: all
 	scp panwalks* drop1:drop1/www
 
-clean:
-	rm -rf *.png *.gif out .DS_Store
+tidy:
+	rm -rf out .DS_Store
+
+clean: tidy
+	rm -rf *.png *.gif
 
 # Making the conda environment.  Seems like it needs to be 3.7, and conda uses
 # the "current" python to make environments, so:
