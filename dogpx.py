@@ -34,7 +34,12 @@ class PositronTiles(cartopy.io.img_tiles.GoogleWTS):
     # We're drawing a lot of maps, cache the tiles
     @functools.lru_cache(maxsize=None)
     def get_image(self, tile):
-        return super().get_image(tile)
+        try:
+            return super().get_image(tile)
+        except Exception as exc:
+            print(f"Oh noes! {exc}")
+            raise
+
 
 tiles = PositronTiles()
 
