@@ -34,11 +34,7 @@ class PositronTiles(cartopy.io.img_tiles.GoogleWTS):
     # We're drawing a lot of maps, cache the tiles
     @functools.lru_cache(maxsize=None)
     def get_image(self, tile):
-        try:
-            return super().get_image(tile)
-        except Exception as exc:
-            print(f"Oh noes! {exc}")
-            raise
+        return super().get_image(tile)
 
 
 tiles = PositronTiles()
@@ -99,6 +95,7 @@ def plot_shapes(shapes, styles, fname, detail_level=DETAIL_LEVEL, dpi=DPI):
 
 styles = [
     dict(edgecolor="#000000", linewidth=.2, facecolor="none"),
+    # I tried a more complex fading out of previous walks, but didn't like it:
     #dict(edgecolor="#7f0000", linewidth=.5, facecolor="none"),
     #dict(edgecolor="#0000ff", linewidth=1, facecolor="none"),
     #dict(edgecolor="#00ff00", linewidth=1, facecolor="none"),
