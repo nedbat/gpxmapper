@@ -57,7 +57,7 @@ for gpxname in sorted(glob.glob(sys.argv[1])):
     boundss.append((lb[0], lb[1]))
     boundss.append((lb[2], lb[3]))
 all_points = shapely.geometry.MultiPoint(boundss)
-print(f"{(total / METERS_PER_MILE):.2f} miles")
+print(f"{len(walks)} walks, {(total / METERS_PER_MILE):.2f} miles")
 
 sb = all_points.bounds
 pad = .01
