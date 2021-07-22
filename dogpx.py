@@ -109,4 +109,7 @@ for num in tqdm.tqdm(range(len(walks) + 1)):
 
 # Plot everything larger with more detail.
 print("panwalks_large.png")
-plot_shapes(walks, styles[:1], "panwalks_large.png", detail_level=DETAIL_LEVEL+1, dpi=1200)
+large_styles = [
+    dict(edgecolor="#000000", linewidth=.05, facecolor="none"),
+]
+plot_shapes(walks, large_styles, "panwalks_large.png", detail_level=DETAIL_LEVEL+2, dpi=1200)
