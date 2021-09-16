@@ -36,6 +36,8 @@ class PositronTiles(cartopy.io.img_tiles.GoogleWTS):
     def get_image(self, tile):
         return super().get_image(tile)
 
+TILES = PositronTiles()
+
 def zip_end(long, short):
     """Zip long and short together, aligned at the end."""
     if not long:
@@ -47,12 +49,12 @@ def zip_end(long, short):
 
 def plot_shapes(shapes, styles, fname, detail_level=DETAIL_LEVEL, dpi=DPI):
     fig, ax = plt.subplots(
-        subplot_kw=dict(projection=tiles.crs),
+        subplot_kw=dict(projection=TILES.crs),
     )
     ax.set_extent(extent)
     ax.apply_aspect()
     if detail_level:
-        ax.add_image(tiles, detail_level)
+        ax.add_image(TILES, detail_level)
 
     for shape, style_kwargs in zip_end(shapes, styles):
         if shape is not None:
@@ -66,35 +68,36 @@ def plot_shapes(shapes, styles, fname, detail_level=DETAIL_LEVEL, dpi=DPI):
     plt.close(fig)
 
 
-tiles = PositronTiles()
+def walks_extent(files):
+    METERS_PER_MILE = 1609.34
 
-METERS_PER_MILE = 1609.34
+    boundss = []
+    walks = []
+    total = 0
+    for gpxname in sorted(glob.glob(files)):
+        with fiona.open(gpxname, layer="routes") as layer:
+            lb = layer.bounds
+            walk = shapely.geometry.shape({
+                "type": "LineString",
+                "coordinates": layer[0]["geometry"]["coordinates"],
+            })
+            walks.append(walk)
+            dist = pyproj.Geod(ellps="WGS84").geometry_length(walk)
+            total += dist
+        boundss.append((lb[0], lb[1]))
+        boundss.append((lb[2], lb[3]))
+    all_points = shapely.geometry.MultiPoint(boundss)
+    print(f"{len(walks)} walks, {(total / METERS_PER_MILE):.2f} miles")
 
-boundss = []
-walks = []
-total = 0
-for gpxname in sorted(glob.glob(sys.argv[1])):
-    with fiona.open(gpxname, layer="routes") as layer:
-        lb = layer.bounds
-        walk = shapely.geometry.shape({
-            "type": "LineString",
-            "coordinates": layer[0]["geometry"]["coordinates"],
-        })
-        walks.append(walk)
-        dist = pyproj.Geod(ellps="WGS84").geometry_length(walk)
-        total += dist
-    boundss.append((lb[0], lb[1]))
-    boundss.append((lb[2], lb[3]))
-all_points = shapely.geometry.MultiPoint(boundss)
-print(f"{len(walks)} walks, {(total / METERS_PER_MILE):.2f} miles")
+    sb = all_points.bounds
+    pad = .01
+    extent = [sb[0]-pad, sb[2]+pad, sb[1]-pad, sb[3]+pad]
+    return walks, extent
 
-sb = all_points.bounds
-pad = .01
-extent = [sb[0]-pad, sb[2]+pad, sb[1]-pad, sb[3]+pad]
-
-os.makedirs("out", exist_ok=True)
+walks, extent = walks_extent(sys.argv[1])
 
 if sys.argv[2] == "walks":
+    os.makedirs("out", exist_ok=True)
     styles = [
         dict(edgecolor="#000000", linewidth=.2, facecolor="none"),
         # I tried a more complex fading out of previous walks, but didn't like it:

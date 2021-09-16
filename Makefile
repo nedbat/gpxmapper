@@ -1,35 +1,36 @@
-.PHONY: all walks gif png publish clean
+.PHONY: after all savegpx walks large centuries gif png publish tidy clean
 
 GPXS = /Users/ned/walks/brookline/*.gpx
 GIF = panwalks.gif
 PNG = panwalks.png
-LAST = panwalks_large.png
+LARGE = panwalks_large.png
+WALK99 = out/099.png
 FINAL_FRAME = $$(ls -1 out/*.png | tail -1)
 
 after: savegpx walks large centuries publish tidy
 
-all: $(LAST) $(PNG) $(GIF)
+all: $(WALK99) $(LARGE) $(PNG) $(GIF) centuries
 
 savegpx:
 	mv -v /dwn/onthegomap-*.gpx ~/walks/brookline/$$(date +%Y%m%d)_brookline.gpx
 
-walks: $(GPXS)
+walks $(WALK99): $(GPXS)
 	python dogpx.py "$(GPXS)" walks
 
-large $(LAST): $(GPXS)
+large $(LARGE): $(GPXS)
 	python dogpx.py "$(GPXS)" large
 
 centuries:
 	python dogpx.py "$(GPXS)" centuries
 
-gif $(GIF): $(LAST)
+gif $(GIF): $(WALK99)
 	eval $$(python tapergif.py out/$(GIF) out/*.png)
 	gifsicle --no-conserve-memory -i out/$(GIF) -O3 --colors 12 -o $(GIF)
 
-png $(PNG): $(LAST)
+png $(PNG): $(WALK99)
 	cp $(FINAL_FRAME) $(PNG)
 
-publish: all
+publish: $(GIF) $(LARGE) $(PNG)
 	scp panwalks* drop1:drop1/www
 
 tidy:
