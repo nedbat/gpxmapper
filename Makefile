@@ -6,15 +6,21 @@ PNG = panwalks.png
 LAST = panwalks_large.png
 FINAL_FRAME = $$(ls -1 out/*.png | tail -1)
 
-after: savegpx walks publish tidy
+after: savegpx walks large centuries publish tidy
 
 all: $(LAST) $(PNG) $(GIF)
 
 savegpx:
 	mv -v /dwn/onthegomap-*.gpx ~/walks/brookline/$$(date +%Y%m%d)_brookline.gpx
 
-walks $(LAST): $(GPXS)
-	python dogpx.py "$(GPXS)"
+walks: $(GPXS)
+	python dogpx.py "$(GPXS)" walks
+
+large $(LAST): $(GPXS)
+	python dogpx.py "$(GPXS)" large
+
+centuries:
+	python dogpx.py "$(GPXS)" centuries
 
 gif $(GIF): $(LAST)
 	eval $$(python tapergif.py out/$(GIF) out/*.png)

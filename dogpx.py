@@ -36,6 +36,35 @@ class PositronTiles(cartopy.io.img_tiles.GoogleWTS):
     def get_image(self, tile):
         return super().get_image(tile)
 
+def zip_end(long, short):
+    """Zip long and short together, aligned at the end."""
+    if not long:
+        shorts = []
+    else:
+        shorts = short[-len(long):]
+    together = list(itertools.zip_longest(reversed(long), reversed(shorts), fillvalue=short[0]))
+    return list(reversed(together))
+
+def plot_shapes(shapes, styles, fname, detail_level=DETAIL_LEVEL, dpi=DPI):
+    fig, ax = plt.subplots(
+        subplot_kw=dict(projection=tiles.crs),
+    )
+    ax.set_extent(extent)
+    ax.apply_aspect()
+    if detail_level:
+        ax.add_image(tiles, detail_level)
+
+    for shape, style_kwargs in zip_end(shapes, styles):
+        if shape is not None:
+            ax.add_geometries(
+                [shape],
+                cartopy.crs.PlateCarree(),
+                **style_kwargs,
+            )
+
+    plot_png(ax, fname, dpi=dpi)
+    plt.close(fig)
+
 
 tiles = PositronTiles()
 
@@ -65,51 +94,36 @@ extent = [sb[0]-pad, sb[2]+pad, sb[1]-pad, sb[3]+pad]
 
 os.makedirs("out", exist_ok=True)
 
-def zip_end(long, short):
-    """Zip long and short together, aligned at the end."""
-    if not long:
-        shorts = []
-    else:
-        shorts = short[-len(long):]
-    together = list(itertools.zip_longest(reversed(long), reversed(shorts), fillvalue=short[0]))
-    return list(reversed(together))
+if sys.argv[2] == "walks":
+    styles = [
+        dict(edgecolor="#000000", linewidth=.2, facecolor="none"),
+        # I tried a more complex fading out of previous walks, but didn't like it:
+        #dict(edgecolor="#7f0000", linewidth=.5, facecolor="none"),
+        #dict(edgecolor="#0000ff", linewidth=1, facecolor="none"),
+        #dict(edgecolor="#00ff00", linewidth=1, facecolor="none"),
+        dict(edgecolor="#ff0000", linewidth=1, facecolor="none"),
+    ]
 
-def plot_shapes(shapes, styles, fname, detail_level=DETAIL_LEVEL, dpi=DPI):
-    fig, ax = plt.subplots(
-        subplot_kw=dict(projection=tiles.crs),
-    )
-    ax.set_extent(extent)
-    ax.apply_aspect()
-    ax.add_image(tiles, detail_level)
+    # first image no walks, last image all walks, not colored.
+    walks += [None] * (len(styles) - 1)
+    for num in tqdm.tqdm(range(len(walks) + 1)):
+        plot_shapes(walks[:num], styles, f"out/{num:03d}.png")
 
-    for shape, style_kwargs in zip_end(shapes, styles):
-        if shape is not None:
-            ax.add_geometries(
-                [shape],
-                cartopy.crs.PlateCarree(),
-                **style_kwargs,
-            )
+elif sys.argv[2] == "large":
+    # Plot everything larger with more detail.
+    print("panwalks_large.png")
+    large_styles = [
+        dict(edgecolor="#000000", linewidth=.05, facecolor="none"),
+    ]
+    plot_shapes(walks, large_styles, "panwalks_large.png", detail_level=DETAIL_LEVEL+2, dpi=1200)
 
-    plot_png(ax, fname, dpi=dpi)
-    plt.close(fig)
-
-styles = [
-    dict(edgecolor="#000000", linewidth=.2, facecolor="none"),
-    # I tried a more complex fading out of previous walks, but didn't like it:
-    #dict(edgecolor="#7f0000", linewidth=.5, facecolor="none"),
-    #dict(edgecolor="#0000ff", linewidth=1, facecolor="none"),
-    #dict(edgecolor="#00ff00", linewidth=1, facecolor="none"),
-    dict(edgecolor="#ff0000", linewidth=1, facecolor="none"),
-]
-
-# first image no walks, last image all walks, not colored.
-walks += [None] * (len(styles) - 1)
-for num in tqdm.tqdm(range(len(walks) + 1)):
-    plot_shapes(walks[:num], styles, f"out/{num:03d}.png")
-
-# Plot everything larger with more detail.
-print("panwalks_large.png")
-large_styles = [
-    dict(edgecolor="#000000", linewidth=.05, facecolor="none"),
-]
-plot_shapes(walks, large_styles, "panwalks_large.png", detail_level=DETAIL_LEVEL+2, dpi=1200)
+elif sys.argv[2] == "centuries":
+    for start in range(0, len(walks), 100):
+        walks_backward = walks[:start+100][::-1]
+        fname = "century{}.png".format(start+100)
+        print("{}, {} walks start at {}".format(fname, len(walks_backward), start))
+        styles = (
+            [dict(edgecolor="#000000", linewidth=.2, facecolor="none")] * (len(walks_backward)-start) +
+            [dict(edgecolor="#ffffff", linewidth=.5, facecolor="none")] * start
+        )
+        plot_shapes(walks_backward, styles, fname, detail_level=0)
