@@ -4,12 +4,13 @@ GPXS = /Users/ned/walks/brookline/*.gpx
 GIF = panwalks.gif
 PNG = panwalks.png
 LARGE = panwalks_large.png
+XLARGE = panwalks_xlarge.webp
 WALK99 = out/099.png
 FINAL_FRAME = $$(ls -1 out/*.png | tail -1)
 
-after: savegpx walks large centuries publish tidy
+after: savegpx walks xlarge centuries publish tidy
 
-all: $(WALK99) $(LARGE) $(PNG) $(GIF) centuries
+all: $(WALK99) $(LARGE) $(XLARGE) $(PNG) $(GIF) centuries
 
 savegpx:
 	mv -v /dwn/onthegomap-*.gpx ~/walks/brookline/$$(date +%Y%m%d)_brookline.gpx
@@ -19,6 +20,14 @@ walks $(WALK99): $(GPXS)
 
 large $(LARGE): $(GPXS)
 	python dogpx.py "$(GPXS)" large
+
+xlarge $(XLARGE): $(GPXS)
+	python dogpx.py "$(GPXS)" xlarge
+	magick panwalks_xlarge.png \( \
+		+clone -threshold 101% -fill white -draw \
+			'circle %[fx:int(w/2)],%[fx:int(h/2)] %[fx:int(w/2)],%[fx:4300+int(h/2)]' \
+		\) -channel-fx '| gray=>alpha' panwalks_xlarge.webp
+	rm panwalks_xlarge.png
 
 centuries:
 	python dogpx.py "$(GPXS)" centuries
@@ -30,14 +39,14 @@ gif $(GIF): $(WALK99)
 png $(PNG): $(WALK99)
 	cp $(FINAL_FRAME) $(PNG)
 
-publish: $(GIF) $(LARGE) $(PNG)
+publish: $(GIF) $(XLARGE) $(PNG)
 	scp panwalks* drop1:drop1/www
 
 tidy:
 	rm -rf out .DS_Store
 
 clean: tidy
-	rm -rf *.png *.gif
+	rm -rf *.png *.gif *.webp
 
 # Making the conda environment.  Seems like it needs to be 3.7, and conda uses
 # the "current" python to make environments, so:
