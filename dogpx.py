@@ -73,6 +73,7 @@ def walks_extent(files):
 
     boundss = []
     walks = []
+    dists = []
     total = 0
     for gpxname in sorted(glob.glob(files)):
         with fiona.open(gpxname, layer="routes") as layer:
@@ -82,19 +83,20 @@ def walks_extent(files):
                 "coordinates": layer[0]["geometry"]["coordinates"],
             })
             walks.append(walk)
-            dist = pyproj.Geod(ellps="WGS84").geometry_length(walk)
+            dist = pyproj.Geod(ellps="WGS84").geometry_length(walk) / METERS_PER_MILE
+            dists.append(dist)
             total += dist
         boundss.append((lb[0], lb[1]))
         boundss.append((lb[2], lb[3]))
     all_points = shapely.geometry.MultiPoint(boundss)
-    print(f"{len(walks)} walks, {(total / METERS_PER_MILE):.2f} miles")
+    print(f"{len(walks)} walks, {total:.2f} miles")
 
     sb = all_points.bounds
     pad = .01
     extent = [sb[0]-pad, sb[2]+pad, sb[1]-pad, sb[3]+pad]
-    return walks, extent
+    return walks, dists, extent
 
-walks, extent = walks_extent(sys.argv[1])
+walks, dists, extent = walks_extent(sys.argv[1])
 
 if sys.argv[2] == "walks":
     os.makedirs("out", exist_ok=True)
@@ -132,7 +134,10 @@ elif sys.argv[2] == "centuries":
     for start in range(0, len(walks), 100):
         walks_backward = walks[:start+100][::-1]
         fname = "century{}.png".format(start+100)
-        print("{}, {} walks start at {}".format(fname, len(walks_backward), start))
+        walk_dists = dists[start:start+100]
+        dist = sum(walk_dists)
+        avg = dist / len(walk_dists)
+        print("{}, {} walks start at {}, {:.2f} miles, {:.2f} avg".format(fname, len(walk_dists), start, dist, avg))
         styles = (
             [dict(edgecolor="#000000", linewidth=.2, facecolor="none")] * (len(walks_backward)-start) +
             [dict(edgecolor="#ffffff", linewidth=.5, facecolor="none")] * start
