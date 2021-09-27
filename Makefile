@@ -1,16 +1,17 @@
-.PHONY: after all savegpx walks large centuries gif png publish tidy clean
+.PHONY: after all savegpx walks large centuries gif png icon publish tidy clean
 
 GPXS = /Users/ned/walks/brookline/*.gpx
 GIF = panwalks.gif
 PNG = panwalks.png
+ICON = panwalks_icon.png
 LARGE = panwalks_large.png
 XLARGE = panwalks_xlarge.webp
 WALK99 = out/099.png
 FINAL_FRAME = $$(ls -1 out/*.png | tail -1)
 
-after: savegpx walks xlarge centuries publish tidy
+after: savegpx all publish tidy
 
-all: $(WALK99) $(LARGE) $(XLARGE) $(PNG) $(GIF) centuries
+all: $(WALK99) $(LARGE) $(XLARGE) $(PNG) $(ICON) $(GIF) centuries
 
 savegpx:
 	mv -v /dwn/onthegomap-*.gpx ~/walks/brookline/$$(date +%Y%m%d)_brookline.gpx
@@ -38,6 +39,9 @@ gif $(GIF): $(WALK99)
 
 png $(PNG): $(WALK99)
 	cp $(FINAL_FRAME) $(PNG)
+
+icon $(ICON): $(PNG)
+	convert $(PNG) -resize 256x256 $(ICON)
 
 publish: $(GIF) $(XLARGE) $(PNG)
 	scp panwalks* drop1:drop1/www
