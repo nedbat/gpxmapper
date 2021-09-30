@@ -124,11 +124,11 @@ elif sys.argv[2] == "large":
 
 elif sys.argv[2] == "xlarge":
     # Plot everything even larger with even more detail.
-    print("panwalks_xlarge.png")
+    print("out/panwalks_xlarge.png")
     large_styles = [
         dict(edgecolor="#000000", linewidth=.05, facecolor="none"),
     ]
-    plot_shapes(walks, large_styles, "panwalks_xlarge.png", detail_level=DETAIL_LEVEL+3, dpi=2400)
+    plot_shapes(walks, large_styles, "out/panwalks_xlarge.png", detail_level=DETAIL_LEVEL+3, dpi=2400)
 
 elif sys.argv[2] == "centuries":
     for start in range(0, len(walks), 100):

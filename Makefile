@@ -5,7 +5,7 @@ GIF = panwalks.gif
 PNG = panwalks.png
 ICON = panwalks_icon.png
 LARGE = panwalks_large.png
-XLARGE = panwalks_xlarge.webp
+XLARGE = panwalks_xlarge.avif
 WALK99 = out/099.png
 FINAL_FRAME = $$(ls -1 out/*.png | tail -1)
 
@@ -24,11 +24,10 @@ large $(LARGE): $(GPXS)
 
 xlarge $(XLARGE): $(GPXS)
 	python dogpx.py "$(GPXS)" xlarge
-	magick panwalks_xlarge.png \( \
+	magick out/panwalks_xlarge.png \( \
 		+clone -threshold 101% -fill white -draw \
-			'circle %[fx:int(w/2)],%[fx:int(h/2)] %[fx:int(w/2)],%[fx:4300+int(h/2)]' \
-		\) -channel-fx '| gray=>alpha' panwalks_xlarge.webp
-	rm panwalks_xlarge.png
+			'circle %[fx:int(w/2)],%[fx:int(h/2)] %[fx:int(w/2)],%[fx:4800+int(h/2)]' \
+		\) -channel-fx '| gray=>alpha' $(XLARGE)
 
 centuries:
 	python dogpx.py "$(GPXS)" centuries
@@ -50,7 +49,7 @@ tidy:
 	rm -rf out .DS_Store
 
 clean: tidy
-	rm -rf *.png *.gif *.webp
+	rm -rf *.png *.gif *.webp *.avif
 
 # Making the conda environment.  Seems like it needs to be 3.7, and conda uses
 # the "current" python to make environments, so:
