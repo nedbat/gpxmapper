@@ -14,7 +14,7 @@ after: savegpx all publish tidy
 all: $(WALK99) $(LARGE) $(XLARGE) $(PNG) $(ICON) $(GIF) centuries
 
 savegpx:
-	mv -v /dwn/onthegomap-*.gpx ~/walks/brookline/$$(date +%Y%m%d)_brookline.gpx
+	-mv -v /dwn/onthegomap-*.gpx ~/walks/brookline/$$(date +%Y%m%d)_brookline.gpx
 
 walks $(WALK99): $(GPXS)
 	python dogpx.py "$(GPXS)" walks
