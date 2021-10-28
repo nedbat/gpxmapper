@@ -5,7 +5,7 @@ GIF = panwalks.gif
 PNG = panwalks.png
 ICON = panwalks_icon.png
 LARGE = panwalks_large.png
-XLARGE = panwalks_xlarge.avif
+XLARGE = panwalks_xlarge.webp
 WALK99 = out/099.png
 FINAL_FRAME = $$(ls -1 out/*.png | tail -1)
 
