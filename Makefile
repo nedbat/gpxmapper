@@ -9,7 +9,7 @@ XLARGE = panwalks_xlarge.webp
 WALK99 = out/099.png
 FINAL_FRAME = $$(ls -1 out/*.png | tail -1)
 
-after: savegpx all publish tidy
+after: clean savegpx all publish tidy
 
 all: $(WALK99) $(LARGE) $(XLARGE) $(PNG) $(ICON) $(GIF) centuries
 
